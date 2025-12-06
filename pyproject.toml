@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-spritefusion-pixel-snapper"
 version = "0.1.0"
-description = ""
+description = "ComfyUI custom node port of Sprite Fusion Pixel Snapper that snaps pixel art to a clean grid and quantized palette."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
@@ -15,7 +15,12 @@ authors = [
 ]
 keywords = [
     "comfyui",
-    "pixel"
+    "pixel",
+    "pixel-art",
+    "grid-snap",
+    "palette-quantization",
+    "spritefusion",
+    "image-processing"
 ]
 
 [project.urls]
