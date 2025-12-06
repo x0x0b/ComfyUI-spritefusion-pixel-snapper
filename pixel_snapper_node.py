@@ -2,7 +2,8 @@
 ComfyUI custom node port of Sprite Fusion Pixel Snapper (original Rust).
 The node snaps AI‑generated pixel art to a consistent grid and palette.
 
-Original project: https://github.com/Hugo-Dz/spritefusion-pixel-snapper (MIT)
+Original project (MIT) © 2025 Hugo Duprez:
+https://github.com/Hugo-Dz/spritefusion-pixel-snapper
 Ported to Python for ComfyUI custom_nodes.
 """
 
