@@ -40,23 +40,45 @@ class PixelSnapperError(ValueError):
 
 def tensor_to_numpy_batch(image: torch.Tensor) -> np.ndarray:
     """
-    Convert a ComfyUI IMAGE tensor (B, C, H, W) float in [0,1] to uint8 numpy (B, H, W, 3).
+    Convert a ComfyUI IMAGE tensor to numpy uint8 in channel-last layout (B, H, W, 3).
+    Accepts both ComfyUI standard (B, H, W, C) and channel-first (B, C, H, W) tensors.
+    If C == 4, the alpha channel is dropped.
     """
-    if image.ndim != 4 or image.size(1) != 3:
-        raise PixelSnapperError("Expected IMAGE tensor with shape (B, 3, H, W).")
-    image = image.detach().cpu().clamp(0.0, 1.0)
-    np_imgs = (image.permute(0, 2, 3, 1).numpy() * 255.0).round().astype(np.uint8)
+    t = image.detach().cpu().clamp(0.0, 1.0)
+
+    if t.ndim == 3:
+        # Single image without batch
+        if t.shape[0] in (3, 4):  # C, H, W
+            t = t.unsqueeze(0).movedim(1, -1)
+        elif t.shape[-1] in (3, 4):  # H, W, C
+            t = t.unsqueeze(0)
+        else:
+            raise PixelSnapperError("Expected IMAGE tensor with 3 or 4 channels.")
+    elif t.ndim == 4:
+        if t.shape[1] in (3, 4):  # B, C, H, W
+            t = t.movedim(1, -1)
+        elif t.shape[-1] in (3, 4):  # B, H, W, C
+            pass
+        else:
+            raise PixelSnapperError("Expected IMAGE tensor with 3 or 4 channels.")
+    else:
+        raise PixelSnapperError("Expected IMAGE tensor with shape (B,H,W,C) or (B,C,H,W).")
+
+    if t.shape[-1] == 4:
+        t = t[..., :3]
+
+    np_imgs = (t.numpy() * 255.0).round().astype(np.uint8)
     return np_imgs
 
 
 def numpy_batch_to_tensor(images: np.ndarray) -> torch.Tensor:
     """
-    Convert numpy batch (B, H, W, 3) uint8 to ComfyUI IMAGE tensor float in [0,1].
+    Convert numpy batch (B, H, W, 3) uint8 to ComfyUI IMAGE tensor (B, H, W, 3) float in [0,1].
     """
     if images.ndim != 4 or images.shape[-1] != 3:
         raise PixelSnapperError("Expected numpy batch with shape (B, H, W, 3).")
     tensor = torch.from_numpy(images.astype(np.float32) / 255.0)
-    return tensor.permute(0, 3, 1, 2)
+    return tensor
 
 
 # --- Core algorithm (ported from Rust) ---------------------------------------
@@ -152,7 +174,7 @@ def compute_profiles(img: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def estimate_step_size(profile: Sequence[float], config: Config) -> Optional[float]:
-    if not profile:
+    if len(profile) == 0:
         return None
     max_val = float(np.max(profile))
     if max_val == 0.0:
