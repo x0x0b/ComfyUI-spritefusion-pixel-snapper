@@ -1,0 +1,27 @@
+[project]
+name = "comfyui-spritefusion-pixel-snapper"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.3.5",
+    "torch>=2.9.1",
+]
+authors = [
+    { name = "x0x0b" },
+]
+keywords = [
+    "comfyui",
+    "pixel"
+]
+
+[project.urls]
+Repository = "https://github.com/x0x0b/ComfyUI-spritefusion-pixel-snapper"
+Issues = "https://github.com/x0x0b/ComfyUI-spritefusion-pixel-snapper/issues"
+
+[tool.comfy]
+PublisherId = "x0x0b"
+DisplayName = "SpriteFusion Pixel Snapper for ComfyUI"
+Icon = "https://raw.githubusercontent.com/x0x0b/ComfyUI-spritefusion-pixel-snapper/main/web/icon.svg"
