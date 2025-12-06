@@ -11,6 +11,7 @@ dependencies = [
 ]
 authors = [
     { name = "x0x0b" },
+    { name = "Hugo Duprez", comment = "Original algorithm (upstream)"},
 ]
 keywords = [
     "comfyui",
