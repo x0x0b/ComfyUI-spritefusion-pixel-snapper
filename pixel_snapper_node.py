@@ -638,7 +638,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "PixelSnapper": "Pixel Snapper (SpriteFusion)",
+    "PixelSnapper": "SpriteFusion Pixel Snapper",
 }
 
 # Friendly name for ComfyUI extension listing

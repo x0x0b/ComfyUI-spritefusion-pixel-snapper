@@ -10,7 +10,7 @@ Dependencies are already bundled with ComfyUI (PyTorch + NumPy); no extra
 packages are required.
 
 ## Node
-- **Name:** `Pixel Snapper (SpriteFusion)`
+- **Name:** `SpriteFusion Pixel Snapper`
 - **Category:** `image/processing`
 
 ### Inputs
