@@ -27,7 +27,6 @@ Advanced parameters mirror the original Rust defaults and can be tweaked:
 ### Output
 - `IMAGE` – pixel-snapped result, one frame per input frame.
 
-## Notes
-- The algorithm is a direct port of
-  <https://github.com/Hugo-Dz/spritefusion-pixel-snapper> (MIT licensed).
-- Works on batched images; each frame is processed independently.
+## License
+- This repository: MIT (see [LICENSE](LICENSE), © 2025 x0x0b).
+- Upstream algorithm: MIT (see [LICENSE-spritefusion-pixel-snapper](LICENSE-spritefusion-pixel-snapper), © 2025 Hugo Duprez).
