@@ -1,6 +1,6 @@
-# ComfyUI Sprite Fusion Pixel Snapper
+# Sprite Fusion Pixel Snapper for ComfyUI
 
-![Sprite Fusion Pixel Snapper icon](icon.png)
+![Sprite Fusion Pixel Snapper for ComfyUI icon](icon.png)
 
 This custom node is a Python port of the [Sprite Fusion Pixel Snapper](https://github.com/Hugo-Dz/spritefusion-pixel-snapper) tool
 that fixes messy AI-generated pixel art by snapping it to a clean grid and
