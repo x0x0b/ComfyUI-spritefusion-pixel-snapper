@@ -13,7 +13,7 @@ packages are required.
 
 ## Node
 - **Name:** `SpriteFusion Pixel Snapper`
-- **Category:** `image/processing`
+- **Category:** `image/transform`
 
 ### Inputs
 - `image` – ComfyUI `IMAGE` tensor.
