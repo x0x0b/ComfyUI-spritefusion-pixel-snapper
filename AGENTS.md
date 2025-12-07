@@ -12,7 +12,7 @@ Guide for contributing to the ComfyUI Sprite Fusion Pixel Snapper node while kee
 - Python 3.10+ with ComfyUI’s bundled `torch` and `numpy`.
 - Editable install (optional for IDEs): `python -m pip install -e .`
 - Quick syntax check: `python -m compileall pixel_snapper_node.py`
-- Manual smoke test inside ComfyUI: place this folder under `ComfyUI/custom_nodes/`, restart ComfyUI, run a simple workflow that feeds an IMAGE into **SpriteFusion Pixel Snapper** with `k_colors=16` and verify the output grid/palette look clean.
+- Manual smoke test inside ComfyUI: place this folder under `ComfyUI/custom_nodes/`, restart ComfyUI, run a simple workflow that feeds an IMAGE into **Sprite Fusion Pixel Snapper** with `k_colors=16` and verify the output grid/palette look clean.
 
 ## Coding Style & Naming Conventions
 - Follow PEP 8 with 4-space indents; favor explicit type hints and dataclasses for configuration-style structs.

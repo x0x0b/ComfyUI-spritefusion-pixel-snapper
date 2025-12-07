@@ -29,5 +29,5 @@ Issues = "https://github.com/x0x0b/ComfyUI-spritefusion-pixel-snapper/issues"
 
 [tool.comfy]
 PublisherId = "x0x0b"
-DisplayName = "SpriteFusion Pixel Snapper for ComfyUI"
+DisplayName = "Sprite Fusion Pixel Snapper for ComfyUI"
 Icon = "https://raw.githubusercontent.com/x0x0b/ComfyUI-spritefusion-pixel-snapper/main/icon.png"
