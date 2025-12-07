@@ -546,7 +546,7 @@ class PixelSnapperNode:
                     {
                         "default": 1,
                         "min": 1,
-                        "max": 8,
+                        "max": 16,
                         "tooltip": "Integer upscaling factor (nearest-neighbor) applied after snapping",
                     },
                 ),

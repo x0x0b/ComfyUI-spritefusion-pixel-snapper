@@ -17,7 +17,7 @@ packages are required.
 - `image` – ComfyUI `IMAGE` tensor.
 - `k_colors` (int) – Palette size (default 16).
 - `k_seed` (int) – RNG seed for palette init (default 42).
-- `output_scale` (int) – Optional integer upscaling after snapping (nearest-neighbor, default 1).
+- `output_scale` (int) – Optional integer upscaling after snapping (nearest-neighbor, default 1, max 16).
 
 Advanced parameters mirror the original Rust defaults and can be tweaked:
 `max_kmeans_iterations`, `peak_threshold_multiplier`, `peak_distance_filter`,
