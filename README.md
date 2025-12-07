@@ -1,5 +1,7 @@
 # ComfyUI Sprite Fusion Pixel Snapper
 
+![Sprite Fusion Pixel Snapper icon](icon.png)
+
 This custom node is a Python port of the Sprite Fusion **Pixel Snapper** tool
 that fixes messy AI-generated pixel art by snapping it to a clean grid and
 quantized palette.
@@ -28,6 +30,9 @@ Advanced parameters mirror the original Rust defaults and can be tweaked:
 ### Output
 - `IMAGE` – pixel-snapped result, one frame per input frame.
 
+## Credits
+- Upstream repository: https://github.com/Hugo-Dz/spritefusion-pixel-snapper
+
 ## License
 - This repository: MIT (see [LICENSE](LICENSE), © 2025 x0x0b).
-- Upstream algorithm: MIT (see [LICENSE-spritefusion-pixel-snapper](LICENSE-spritefusion-pixel-snapper), © 2025 Hugo Duprez).
+- Upstream repository: MIT (see [LICENSE-spritefusion-pixel-snapper](LICENSE-spritefusion-pixel-snapper), © 2025 Hugo Duprez).
