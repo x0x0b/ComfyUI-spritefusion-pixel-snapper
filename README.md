@@ -2,7 +2,7 @@
 
 ![Sprite Fusion Pixel Snapper icon](icon.png)
 
-This custom node is a Python port of the Sprite Fusion **Pixel Snapper** tool
+This custom node is a Python port of the [Sprite Fusion Pixel Snapper](https://github.com/Hugo-Dz/spritefusion-pixel-snapper) tool
 that fixes messy AI-generated pixel art by snapping it to a clean grid and
 quantized palette.
 
