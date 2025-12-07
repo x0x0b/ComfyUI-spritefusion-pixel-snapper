@@ -53,14 +53,18 @@ def tensor_to_numpy_batch(image: torch.Tensor) -> np.ndarray:
         elif t.shape[-1] in (3, 4):  # H, W, C
             t = t.unsqueeze(0)
         else:
-            raise PixelSnapperError("Expected IMAGE tensor with 3 or 4 channels.")
+            raise PixelSnapperError(
+                f"Expected IMAGE tensor with 3 or 4 channels, got shape {tuple(t.shape)}."
+            )
     elif t.ndim == 4:
         if t.shape[1] in (3, 4):  # B, C, H, W
             t = t.movedim(1, -1)
         elif t.shape[-1] in (3, 4):  # B, H, W, C
             pass
         else:
-            raise PixelSnapperError("Expected IMAGE tensor with 3 or 4 channels.")
+            raise PixelSnapperError(
+                f"Expected IMAGE tensor with 3 or 4 channels, got shape {tuple(t.shape)}."
+            )
     else:
         raise PixelSnapperError("Expected IMAGE tensor with shape (B,H,W,C) or (B,C,H,W).")
 
@@ -469,6 +473,11 @@ def process_image_array(img: np.ndarray, config: Config) -> np.ndarray:
     Returns processed uint8 numpy image.
     """
     h, w, _ = img.shape
+
+    # Guard against NaN / Inf inputs (can appear with half-precision pipelines)
+    if not np.isfinite(img).all():
+        raise PixelSnapperError("Input image contains NaN or Inf values.")
+
     validate_image_dimensions(w, h)
 
     quantized = quantize_image(img, config)
