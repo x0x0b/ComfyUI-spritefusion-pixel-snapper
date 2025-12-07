@@ -14,10 +14,6 @@ ENV/
 .env
 .env.*
 
-# ComfyUI prompt history storage
-prompt_history_gallery/data/prompt_history.db
-prompt_history_gallery/data/prompt_history.db-*
-
 # Front-end build output
 node_modules/
 dist/

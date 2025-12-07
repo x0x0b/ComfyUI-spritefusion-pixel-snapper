@@ -12,8 +12,8 @@ Dependencies are already bundled with ComfyUI (PyTorch + NumPy); no extra
 packages are required.
 
 ## Node
-- **Name:** `SpriteFusion Pixel Snapper`
-- **Category:** `image/processing`
+- **Name:** `Sprite Fusion Pixel Snapper`
+- **Category:** `image/transform`
 
 ### Inputs
 - `image` – ComfyUI `IMAGE` tensor.
