@@ -85,6 +85,17 @@ def numpy_batch_to_tensor(images: np.ndarray) -> torch.Tensor:
     return tensor
 
 
+def upscale_nearest(img: np.ndarray, scale: int) -> np.ndarray:
+    """
+    Pixel-art-safe integer upscaling by nearest neighbor.
+    img: (H, W, 3) uint8
+    scale: int >= 1
+    """
+    if scale <= 1:
+        return img
+    return np.repeat(np.repeat(img, scale, axis=0), scale, axis=1)
+
+
 # --- Core algorithm (ported from Rust) ---------------------------------------
 
 def validate_image_dimensions(width: int, height: int) -> None:
@@ -530,6 +541,15 @@ class PixelSnapperNode:
                 ),
             },
             "optional": {
+                "output_scale": (
+                    "INT",
+                    {
+                        "default": 1,
+                        "min": 1,
+                        "max": 8,
+                        "tooltip": "Integer upscaling factor (nearest-neighbor) applied after snapping",
+                    },
+                ),
                 "max_kmeans_iterations": (
                     "INT",
                     {
@@ -628,6 +648,7 @@ class PixelSnapperNode:
         image: torch.Tensor,
         k_colors: int,
         k_seed: int,
+        output_scale: int = 1,
         max_kmeans_iterations: int = 15,
         peak_threshold_multiplier: float = 0.2,
         peak_distance_filter: int = 4,
@@ -656,7 +677,10 @@ class PixelSnapperNode:
         outputs: List[np.ndarray] = []
         for img_np in np_batch:
             try:
-                outputs.append(process_image_array(img_np, config))
+                processed = process_image_array(img_np, config)
+                if output_scale > 1:
+                    processed = upscale_nearest(processed, output_scale)
+                outputs.append(processed)
             except PixelSnapperError as exc:
                 raise PixelSnapperError(f"PixelSnapper failed on one frame: {exc}") from exc
 
