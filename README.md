@@ -8,8 +8,6 @@ quantized palette.
 
 ## Install
 Place this folder inside `ComfyUI/custom_nodes/` and restart ComfyUI.
-Dependencies are already bundled with ComfyUI (PyTorch + NumPy); no extra
-packages are required.
 
 ## Node
 - **Name:** `Sprite Fusion Pixel Snapper`
