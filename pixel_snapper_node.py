@@ -85,6 +85,27 @@ def numpy_batch_to_tensor(images: np.ndarray) -> torch.Tensor:
     return tensor
 
 
+def process_batch(
+    np_batch: np.ndarray,
+    config: Config,
+    output_scale: int,
+) -> List[np.ndarray]:
+    if np_batch.shape[0] == 0:
+        raise PixelSnapperError("Input batch is empty.")
+    outputs: List[np.ndarray] = []
+    for idx, img_np in enumerate(np_batch):
+        try:
+            processed = process_image_array(img_np, config)
+            if output_scale > 1:
+                processed = upscale_nearest(processed, output_scale)
+            outputs.append(processed)
+        except PixelSnapperError as exc:
+            raise PixelSnapperError(
+                f"PixelSnapper failed on frame {idx + 1}/{len(np_batch)}: {exc}"
+            ) from exc
+    return outputs
+
+
 def upscale_nearest(img: np.ndarray, scale: int) -> np.ndarray:
     """
     Pixel-art-safe integer upscaling by nearest neighbor.
@@ -513,14 +534,17 @@ def process_image_array(img: np.ndarray, config: Config) -> np.ndarray:
 
 class PixelSnapperNode:
     """
-    Exposes the Pixel Snapper algorithm as a ComfyUI custom node.
+    Pixel Snapper that returns a list of images to preserve per-frame sizes.
     """
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"tooltip": "Input image tensor (B,3,H,W) to be snapped"}),
+                "image": (
+                    "IMAGE",
+                    {"tooltip": "IMAGE tensor (batch supported). Returns list of images."},
+                ),
                 "k_colors": (
                     "INT",
                     {
@@ -640,6 +664,7 @@ class PixelSnapperNode:
         }
 
     RETURN_TYPES = ("IMAGE",)
+    OUTPUT_IS_LIST = (True,)
     FUNCTION = "snap"
     CATEGORY = "image/transform"
 
@@ -674,18 +699,9 @@ class PixelSnapperNode:
         )
 
         np_batch = tensor_to_numpy_batch(image)
-        outputs: List[np.ndarray] = []
-        for img_np in np_batch:
-            try:
-                processed = process_image_array(img_np, config)
-                if output_scale > 1:
-                    processed = upscale_nearest(processed, output_scale)
-                outputs.append(processed)
-            except PixelSnapperError as exc:
-                raise PixelSnapperError(f"PixelSnapper failed on one frame: {exc}") from exc
-
-        out_tensor = numpy_batch_to_tensor(np.stack(outputs, axis=0))
-        return (out_tensor,)
+        outputs = process_batch(np_batch, config, output_scale)
+        out_list = [numpy_batch_to_tensor(img[None, ...]) for img in outputs]
+        return (out_list,)
 
 
 NODE_CLASS_MAPPINGS = {
@@ -697,4 +713,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 }
 
 # Friendly name for ComfyUI extension listing
-__all__ = ["PixelSnapperNode", "NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
+__all__ = [
+    "PixelSnapperNode",
+    "NODE_CLASS_MAPPINGS",
+    "NODE_DISPLAY_NAME_MAPPINGS",
+]
