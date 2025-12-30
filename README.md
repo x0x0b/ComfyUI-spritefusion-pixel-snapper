@@ -12,7 +12,7 @@ Dependencies are already bundled with ComfyUI (PyTorch + NumPy); no extra
 packages are required.
 
 ## Node
-- **Name:** `Sprite Fusion Pixel Snapper`
+- **Names:** `Sprite Fusion Pixel Snapper`, `Sprite Fusion Pixel Snapper (List)`
 - **Category:** `image/transform`
 
 ### Inputs
@@ -29,6 +29,7 @@ Advanced parameters mirror the original Rust defaults and can be tweaked:
 
 ### Output
 - `IMAGE` – pixel-snapped result, one frame per input frame.
+- `IMAGE (List)` – per-frame outputs as a list, preserving each frame's size.
 
 ## Credits
 - Upstream repository: https://github.com/Hugo-Dz/spritefusion-pixel-snapper

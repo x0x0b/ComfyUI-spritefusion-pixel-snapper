@@ -116,6 +116,55 @@ def pad_image_to_shape(img: np.ndarray, target_h: int, target_w: int) -> np.ndar
     return padded
 
 
+def build_config(
+    k_colors: int,
+    k_seed: int,
+    max_kmeans_iterations: int,
+    peak_threshold_multiplier: float,
+    peak_distance_filter: int,
+    walker_search_window_ratio: float,
+    walker_min_search_window: float,
+    walker_strength_threshold: float,
+    min_cuts_per_axis: int,
+    fallback_target_segments: int,
+    max_step_ratio: float,
+) -> Config:
+    return Config(
+        k_colors=k_colors,
+        k_seed=k_seed,
+        max_kmeans_iterations=max_kmeans_iterations,
+        peak_threshold_multiplier=peak_threshold_multiplier,
+        peak_distance_filter=peak_distance_filter,
+        walker_search_window_ratio=walker_search_window_ratio,
+        walker_min_search_window=walker_min_search_window,
+        walker_strength_threshold=walker_strength_threshold,
+        min_cuts_per_axis=min_cuts_per_axis,
+        fallback_target_segments=fallback_target_segments,
+        max_step_ratio=max_step_ratio,
+    )
+
+
+def process_batch(
+    np_batch: np.ndarray,
+    config: Config,
+    output_scale: int,
+) -> List[np.ndarray]:
+    if np_batch.shape[0] == 0:
+        raise PixelSnapperError("Input batch is empty.")
+    outputs: List[np.ndarray] = []
+    for idx, img_np in enumerate(np_batch):
+        try:
+            processed = process_image_array(img_np, config)
+            if output_scale > 1:
+                processed = upscale_nearest(processed, output_scale)
+            outputs.append(processed)
+        except PixelSnapperError as exc:
+            raise PixelSnapperError(
+                f"PixelSnapper failed on frame {idx + 1}/{len(np_batch)}: {exc}"
+            ) from exc
+    return outputs
+
+
 def upscale_nearest(img: np.ndarray, scale: int) -> np.ndarray:
     """
     Pixel-art-safe integer upscaling by nearest neighbor.
@@ -690,7 +739,7 @@ class PixelSnapperNode:
         fallback_target_segments: int = 64,
         max_step_ratio: float = 1.8,
     ):
-        config = Config(
+        config = build_config(
             k_colors=k_colors,
             k_seed=k_seed,
             max_kmeans_iterations=max_kmeans_iterations,
@@ -705,17 +754,7 @@ class PixelSnapperNode:
         )
 
         np_batch = tensor_to_numpy_batch(image)
-        if np_batch.shape[0] == 0:
-            raise PixelSnapperError("Input batch is empty.")
-        outputs: List[np.ndarray] = []
-        for img_np in np_batch:
-            try:
-                processed = process_image_array(img_np, config)
-                if output_scale > 1:
-                    processed = upscale_nearest(processed, output_scale)
-                outputs.append(processed)
-            except PixelSnapperError as exc:
-                raise PixelSnapperError(f"PixelSnapper failed on one frame: {exc}") from exc
+        outputs = process_batch(np_batch, config, output_scale)
 
         heights = [img.shape[0] for img in outputs]
         widths = [img.shape[1] for img in outputs]
@@ -728,13 +767,70 @@ class PixelSnapperNode:
         return (out_tensor,)
 
 
+class PixelSnapperListNode:
+    """
+    Pixel Snapper that returns a list of images to preserve per-frame sizes.
+    """
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return PixelSnapperNode.INPUT_TYPES()
+
+    RETURN_TYPES = ("IMAGE",)
+    OUTPUT_IS_LIST = (True,)
+    FUNCTION = "snap_list"
+    CATEGORY = "image/transform"
+
+    def snap_list(
+        self,
+        image: torch.Tensor,
+        k_colors: int,
+        k_seed: int,
+        output_scale: int = 1,
+        max_kmeans_iterations: int = 15,
+        peak_threshold_multiplier: float = 0.2,
+        peak_distance_filter: int = 4,
+        walker_search_window_ratio: float = 0.35,
+        walker_min_search_window: float = 2.0,
+        walker_strength_threshold: float = 0.5,
+        min_cuts_per_axis: int = 4,
+        fallback_target_segments: int = 64,
+        max_step_ratio: float = 1.8,
+    ):
+        config = build_config(
+            k_colors=k_colors,
+            k_seed=k_seed,
+            max_kmeans_iterations=max_kmeans_iterations,
+            peak_threshold_multiplier=peak_threshold_multiplier,
+            peak_distance_filter=peak_distance_filter,
+            walker_search_window_ratio=walker_search_window_ratio,
+            walker_min_search_window=walker_min_search_window,
+            walker_strength_threshold=walker_strength_threshold,
+            min_cuts_per_axis=min_cuts_per_axis,
+            fallback_target_segments=fallback_target_segments,
+            max_step_ratio=max_step_ratio,
+        )
+
+        np_batch = tensor_to_numpy_batch(image)
+        outputs = process_batch(np_batch, config, output_scale)
+        out_list = [numpy_batch_to_tensor(img[None, ...]) for img in outputs]
+        return (out_list,)
+
+
 NODE_CLASS_MAPPINGS = {
     "PixelSnapper": PixelSnapperNode,
+    "PixelSnapperList": PixelSnapperListNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "PixelSnapper": "Sprite Fusion Pixel Snapper",
+    "PixelSnapperList": "Sprite Fusion Pixel Snapper (List)",
 }
 
 # Friendly name for ComfyUI extension listing
-__all__ = ["PixelSnapperNode", "NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
+__all__ = [
+    "PixelSnapperNode",
+    "PixelSnapperListNode",
+    "NODE_CLASS_MAPPINGS",
+    "NODE_DISPLAY_NAME_MAPPINGS",
+]
