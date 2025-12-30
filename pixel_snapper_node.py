@@ -600,7 +600,7 @@ class PixelSnapperNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"tooltip": "Input image tensor (B,3,H,W) to be snapped"}),
+                "image": ("IMAGE", {"tooltip": "Single IMAGE tensor (B=1) to be snapped"}),
                 "k_colors": (
                     "INT",
                     {
@@ -754,6 +754,11 @@ class PixelSnapperNode:
         )
 
         np_batch = tensor_to_numpy_batch(image)
+        if np_batch.shape[0] != 1:
+            raise PixelSnapperError(
+                "This node only supports single-image inputs. "
+                "Use Sprite Fusion Pixel Snapper (List) for batches."
+            )
         outputs = process_batch(np_batch, config, output_scale)
 
         heights = [img.shape[0] for img in outputs]
