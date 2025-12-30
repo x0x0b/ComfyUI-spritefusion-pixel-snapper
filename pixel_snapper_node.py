@@ -85,6 +85,37 @@ def numpy_batch_to_tensor(images: np.ndarray) -> torch.Tensor:
     return tensor
 
 
+def dominant_color(img: np.ndarray) -> np.ndarray:
+    """
+    Return the most frequent RGB color in a uint8 image.
+    """
+    if img.size == 0:
+        raise PixelSnapperError("Cannot compute dominant color of empty image.")
+    pixels = img.reshape(-1, 3)
+    values, counts = np.unique(pixels, axis=0, return_counts=True)
+    return values[int(np.argmax(counts))]
+
+
+def pad_image_to_shape(img: np.ndarray, target_h: int, target_w: int) -> np.ndarray:
+    """
+    Pad image to target shape using its dominant color (top-left anchored).
+    """
+    h, w, c = img.shape
+    if c != 3:
+        raise PixelSnapperError("Expected RGB image when padding batch outputs.")
+    if h > target_h or w > target_w:
+        raise PixelSnapperError(
+            f"Cannot pad image from {(h, w)} to smaller target {(target_h, target_w)}."
+        )
+    if h == target_h and w == target_w:
+        return img
+    fill = dominant_color(img)
+    padded = np.empty((target_h, target_w, 3), dtype=np.uint8)
+    padded[:] = fill
+    padded[:h, :w] = img
+    return padded
+
+
 def upscale_nearest(img: np.ndarray, scale: int) -> np.ndarray:
     """
     Pixel-art-safe integer upscaling by nearest neighbor.
@@ -674,6 +705,8 @@ class PixelSnapperNode:
         )
 
         np_batch = tensor_to_numpy_batch(image)
+        if np_batch.shape[0] == 0:
+            raise PixelSnapperError("Input batch is empty.")
         outputs: List[np.ndarray] = []
         for img_np in np_batch:
             try:
@@ -683,6 +716,13 @@ class PixelSnapperNode:
                 outputs.append(processed)
             except PixelSnapperError as exc:
                 raise PixelSnapperError(f"PixelSnapper failed on one frame: {exc}") from exc
+
+        heights = [img.shape[0] for img in outputs]
+        widths = [img.shape[1] for img in outputs]
+        target_h = max(heights)
+        target_w = max(widths)
+        if any(h != target_h or w != target_w for h, w in zip(heights, widths)):
+            outputs = [pad_image_to_shape(img, target_h, target_w) for img in outputs]
 
         out_tensor = numpy_batch_to_tensor(np.stack(outputs, axis=0))
         return (out_tensor,)
