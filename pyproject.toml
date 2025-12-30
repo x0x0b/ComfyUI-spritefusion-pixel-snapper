@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-spritefusion-pixel-snapper"
-version = "0.2.1"
+version = "0.3.0"
 description = "ComfyUI custom node port of Sprite Fusion Pixel Snapper that snaps pixel art to a clean grid and quantized palette."
 readme = "README.md"
 license = { file = "LICENSE" }
