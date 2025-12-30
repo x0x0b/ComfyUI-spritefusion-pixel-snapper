@@ -29,25 +29,3 @@ body:
         - Include UI/UX considerations if relevant
     validations:
       required: true
-  - type: textarea
-    id: usage_context
-    attributes:
-      label: Usage context
-      description: Tell us how you are using the node (workflow, image sizes, palette sizes, etc.).
-      placeholder: |
-        - Typical input sizes:
-        - k_colors:
-        - Output scale:
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives considered
-      description: List any workarounds or other approaches you have evaluated.
-      placeholder: |
-        - Alternative 1
-        - Alternative 2
-  - type: textarea
-    id: additional_context
-    attributes:
-      label: Additional context
-      description: Add screenshots, references, or other context to help us understand the request.

@@ -8,6 +8,14 @@ body:
     attributes:
       value: |
         Thanks for reaching out! Share details so we can help quickly.
+  - type: input
+    id: version
+    attributes:
+      label: ComfyUI-spritefusion-pixel-snapper version / commit
+      description: Include the git commit hash or release tag for this repository.
+      placeholder: e.g. v0.3.0 or 1a2b3c4
+    validations:
+      required: true
   - type: textarea
     id: question_details
     attributes:
