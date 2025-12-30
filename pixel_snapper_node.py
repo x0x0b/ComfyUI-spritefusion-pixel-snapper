@@ -38,6 +38,7 @@ class PixelSnapperError(ValueError):
 
 # --- Utility: tensor <-> numpy ------------------------------------------------
 
+
 def tensor_to_numpy_batch(image: torch.Tensor) -> np.ndarray:
     """
     Convert a ComfyUI IMAGE tensor to numpy uint8 in channel-last layout (B, H, W, 3).
@@ -66,7 +67,9 @@ def tensor_to_numpy_batch(image: torch.Tensor) -> np.ndarray:
                 f"Expected IMAGE tensor with 3 or 4 channels, got shape {tuple(t.shape)}."
             )
     else:
-        raise PixelSnapperError("Expected IMAGE tensor with shape (B,H,W,C) or (B,C,H,W).")
+        raise PixelSnapperError(
+            "Expected IMAGE tensor with shape (B,H,W,C) or (B,C,H,W)."
+        )
 
     if t.shape[-1] == 4:
         t = t[..., :3]
@@ -118,6 +121,7 @@ def upscale_nearest(img: np.ndarray, scale: int) -> np.ndarray:
 
 
 # --- Core algorithm (ported from Rust) ---------------------------------------
+
 
 def validate_image_dimensions(width: int, height: int) -> None:
     if width <= 0 or height <= 0:
@@ -261,17 +265,25 @@ def resolve_step_sizes(
     if step_y_opt is not None:
         return step_y_opt, step_y_opt
 
-    fallback = (min(width, height) / float(config.fallback_target_segments)) if config.fallback_target_segments else 1.0
+    fallback = (
+        (min(width, height) / float(config.fallback_target_segments))
+        if config.fallback_target_segments
+        else 1.0
+    )
     return max(fallback, 1.0), max(fallback, 1.0)
 
 
-def walk(profile: Sequence[float], step_size: float, limit: int, config: Config) -> List[int]:
+def walk(
+    profile: Sequence[float], step_size: float, limit: int, config: Config
+) -> List[int]:
     if len(profile) == 0:
         raise PixelSnapperError("Cannot walk on empty profile")
 
     cuts = [0]
     current_pos = 0.0
-    search_window = max(step_size * config.walker_search_window_ratio, config.walker_min_search_window)
+    search_window = max(
+        step_size * config.walker_search_window_ratio, config.walker_min_search_window
+    )
     mean_val = float(np.mean(profile))
 
     while current_pos < limit:
@@ -337,12 +349,18 @@ def snap_uniform_cuts(
     if limit == 1:
         return [0, 1]
 
-    desired_cells = int(round(limit / target_step)) if target_step > 0 and math.isfinite(target_step) else 0
+    desired_cells = (
+        int(round(limit / target_step))
+        if target_step > 0 and math.isfinite(target_step)
+        else 0
+    )
     desired_cells = max(desired_cells, min_required - 1, 1)
     desired_cells = min(desired_cells, limit)
 
     cell_width = limit / float(desired_cells)
-    search_window = max(cell_width * config.walker_search_window_ratio, config.walker_min_search_window)
+    search_window = max(
+        cell_width * config.walker_search_window_ratio, config.walker_min_search_window
+    )
     mean_val = float(np.mean(profile)) if len(profile) else 0.0
 
     cuts: List[int] = [0]
@@ -404,16 +422,17 @@ def stabilize_cuts(
     axis_cells = max(len(cuts) - 1, 0)
     sibling_cells = max(len(sibling_cuts) - 1, 0)
     sibling_has_grid = (
-        sibling_limit > 0
-        and sibling_cells >= (min_required - 1)
-        and sibling_cells > 0
+        sibling_limit > 0 and sibling_cells >= (min_required - 1) and sibling_cells > 0
     )
     steps_skewed = False
     if sibling_has_grid and axis_cells > 0:
         axis_step = limit / float(axis_cells)
         sibling_step = sibling_limit / float(sibling_cells)
         step_ratio = axis_step / sibling_step
-        steps_skewed = step_ratio > config.max_step_ratio or step_ratio < 1.0 / config.max_step_ratio
+        steps_skewed = (
+            step_ratio > config.max_step_ratio
+            or step_ratio < 1.0 / config.max_step_ratio
+        )
 
     has_enough = len(cuts) >= min_required
     if has_enough and not steps_skewed:
@@ -543,7 +562,9 @@ class PixelSnapperNode:
             "required": {
                 "image": (
                     "IMAGE",
-                    {"tooltip": "IMAGE tensor (batch supported). Returns list of images."},
+                    {
+                        "tooltip": "IMAGE tensor (batch supported). Returns list of images."
+                    },
                 ),
                 "k_colors": (
                     "INT",
