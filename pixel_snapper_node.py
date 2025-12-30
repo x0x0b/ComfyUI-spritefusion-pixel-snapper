@@ -779,7 +779,12 @@ class PixelSnapperListNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return PixelSnapperNode.INPUT_TYPES()
+        types = PixelSnapperNode.INPUT_TYPES()
+        types["required"]["image"] = (
+            "IMAGE",
+            {"tooltip": "IMAGE tensor (batch supported). Returns list of images."},
+        )
+        return types
 
     RETURN_TYPES = ("IMAGE",)
     OUTPUT_IS_LIST = (True,)
