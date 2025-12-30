@@ -85,34 +85,6 @@ def numpy_batch_to_tensor(images: np.ndarray) -> torch.Tensor:
     return tensor
 
 
-def build_config(
-    k_colors: int,
-    k_seed: int,
-    max_kmeans_iterations: int,
-    peak_threshold_multiplier: float,
-    peak_distance_filter: int,
-    walker_search_window_ratio: float,
-    walker_min_search_window: float,
-    walker_strength_threshold: float,
-    min_cuts_per_axis: int,
-    fallback_target_segments: int,
-    max_step_ratio: float,
-) -> Config:
-    return Config(
-        k_colors=k_colors,
-        k_seed=k_seed,
-        max_kmeans_iterations=max_kmeans_iterations,
-        peak_threshold_multiplier=peak_threshold_multiplier,
-        peak_distance_filter=peak_distance_filter,
-        walker_search_window_ratio=walker_search_window_ratio,
-        walker_min_search_window=walker_min_search_window,
-        walker_strength_threshold=walker_strength_threshold,
-        min_cuts_per_axis=min_cuts_per_axis,
-        fallback_target_segments=fallback_target_segments,
-        max_step_ratio=max_step_ratio,
-    )
-
-
 def process_batch(
     np_batch: np.ndarray,
     config: Config,
@@ -560,129 +532,6 @@ def process_image_array(img: np.ndarray, config: Config) -> np.ndarray:
 # --- ComfyUI node ------------------------------------------------------------
 
 
-def build_input_types(image_tooltip: str) -> dict:
-    return {
-        "required": {
-            "image": ("IMAGE", {"tooltip": image_tooltip}),
-            "k_colors": (
-                "INT",
-                {
-                    "default": 16,
-                    "min": 1,
-                    "max": 512,
-                    "tooltip": "Palette size for color quantization (K-Means)",
-                },
-            ),
-            "k_seed": (
-                "INT",
-                {
-                    "default": 42,
-                    "min": 0,
-                    "max": 2**31 - 1,
-                    "tooltip": "Random seed used when seeding K-Means++ centroids",
-                },
-            ),
-        },
-        "optional": {
-            "output_scale": (
-                "INT",
-                {
-                    "default": 1,
-                    "min": 1,
-                    "max": 16,
-                    "tooltip": "Integer upscaling factor (nearest-neighbor) applied after snapping",
-                },
-            ),
-            "max_kmeans_iterations": (
-                "INT",
-                {
-                    "default": 15,
-                    "min": 1,
-                    "max": 200,
-                    "tooltip": "Upper limit on K-Means iterations while learning the palette",
-                },
-            ),
-            "peak_threshold_multiplier": (
-                "FLOAT",
-                {
-                    "default": 0.2,
-                    "min": 0.0,
-                    "max": 5.0,
-                    "step": 0.01,
-                    "tooltip": "Fraction of max gradient used as threshold to keep profile peaks",
-                },
-            ),
-            "peak_distance_filter": (
-                "INT",
-                {
-                    "default": 4,
-                    "min": 1,
-                    "max": 512,
-                    "tooltip": "Minimum pixel spacing between retained peaks in the profile",
-                },
-            ),
-            "walker_search_window_ratio": (
-                "FLOAT",
-                {
-                    "default": 0.35,
-                    "min": 0.01,
-                    "max": 5.0,
-                    "step": 0.01,
-                    "tooltip": "Search window size as a fraction of estimated step when walking cuts",
-                },
-            ),
-            "walker_min_search_window": (
-                "FLOAT",
-                {
-                    "default": 2.0,
-                    "min": 0.1,
-                    "max": 32.0,
-                    "step": 0.1,
-                    "tooltip": "Minimum search window (pixels) around each target cut",
-                },
-            ),
-            "walker_strength_threshold": (
-                "FLOAT",
-                {
-                    "default": 0.5,
-                    "min": 0.0,
-                    "max": 5.0,
-                    "step": 0.01,
-                    "tooltip": "Peak must exceed mean*threshold; otherwise fallback to uniform cut",
-                },
-            ),
-            "min_cuts_per_axis": (
-                "INT",
-                {
-                    "default": 4,
-                    "min": 2,
-                    "max": 512,
-                    "tooltip": "Lowest number of cut positions per axis (including ends)",
-                },
-            ),
-            "fallback_target_segments": (
-                "INT",
-                {
-                    "default": 64,
-                    "min": 1,
-                    "max": 2048,
-                    "tooltip": "Target number of cells when step detection fails; derives fallback step",
-                },
-            ),
-            "max_step_ratio": (
-                "FLOAT",
-                {
-                    "default": 1.8,
-                    "min": 1.0,
-                    "max": 5.0,
-                    "step": 0.05,
-                    "tooltip": "Max allowed X/Y step ratio before snapping to a uniform grid",
-                },
-            ),
-        },
-    }
-
-
 class PixelSnapperNode:
     """
     Pixel Snapper that returns a list of images to preserve per-frame sizes.
@@ -690,9 +539,129 @@ class PixelSnapperNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return build_input_types(
-            "IMAGE tensor (batch supported). Returns list of images."
-        )
+        return {
+            "required": {
+                "image": (
+                    "IMAGE",
+                    {"tooltip": "IMAGE tensor (batch supported). Returns list of images."},
+                ),
+                "k_colors": (
+                    "INT",
+                    {
+                        "default": 16,
+                        "min": 1,
+                        "max": 512,
+                        "tooltip": "Palette size for color quantization (K-Means)",
+                    },
+                ),
+                "k_seed": (
+                    "INT",
+                    {
+                        "default": 42,
+                        "min": 0,
+                        "max": 2**31 - 1,
+                        "tooltip": "Random seed used when seeding K-Means++ centroids",
+                    },
+                ),
+            },
+            "optional": {
+                "output_scale": (
+                    "INT",
+                    {
+                        "default": 1,
+                        "min": 1,
+                        "max": 16,
+                        "tooltip": "Integer upscaling factor (nearest-neighbor) applied after snapping",
+                    },
+                ),
+                "max_kmeans_iterations": (
+                    "INT",
+                    {
+                        "default": 15,
+                        "min": 1,
+                        "max": 200,
+                        "tooltip": "Upper limit on K-Means iterations while learning the palette",
+                    },
+                ),
+                "peak_threshold_multiplier": (
+                    "FLOAT",
+                    {
+                        "default": 0.2,
+                        "min": 0.0,
+                        "max": 5.0,
+                        "step": 0.01,
+                        "tooltip": "Fraction of max gradient used as threshold to keep profile peaks",
+                    },
+                ),
+                "peak_distance_filter": (
+                    "INT",
+                    {
+                        "default": 4,
+                        "min": 1,
+                        "max": 512,
+                        "tooltip": "Minimum pixel spacing between retained peaks in the profile",
+                    },
+                ),
+                "walker_search_window_ratio": (
+                    "FLOAT",
+                    {
+                        "default": 0.35,
+                        "min": 0.01,
+                        "max": 5.0,
+                        "step": 0.01,
+                        "tooltip": "Search window size as a fraction of estimated step when walking cuts",
+                    },
+                ),
+                "walker_min_search_window": (
+                    "FLOAT",
+                    {
+                        "default": 2.0,
+                        "min": 0.1,
+                        "max": 32.0,
+                        "step": 0.1,
+                        "tooltip": "Minimum search window (pixels) around each target cut",
+                    },
+                ),
+                "walker_strength_threshold": (
+                    "FLOAT",
+                    {
+                        "default": 0.5,
+                        "min": 0.0,
+                        "max": 5.0,
+                        "step": 0.01,
+                        "tooltip": "Peak must exceed mean*threshold; otherwise fallback to uniform cut",
+                    },
+                ),
+                "min_cuts_per_axis": (
+                    "INT",
+                    {
+                        "default": 4,
+                        "min": 2,
+                        "max": 512,
+                        "tooltip": "Lowest number of cut positions per axis (including ends)",
+                    },
+                ),
+                "fallback_target_segments": (
+                    "INT",
+                    {
+                        "default": 64,
+                        "min": 1,
+                        "max": 2048,
+                        "tooltip": "Target number of cells when step detection fails; derives fallback step",
+                    },
+                ),
+                "max_step_ratio": (
+                    "FLOAT",
+                    {
+                        "default": 1.8,
+                        "min": 1.0,
+                        "max": 5.0,
+                        "step": 0.05,
+                        "tooltip": "Max allowed X/Y step ratio before snapping to a uniform grid",
+                    },
+                ),
+            },
+        }
 
     RETURN_TYPES = ("IMAGE",)
     OUTPUT_IS_LIST = (True,)
@@ -715,7 +684,7 @@ class PixelSnapperNode:
         fallback_target_segments: int = 64,
         max_step_ratio: float = 1.8,
     ):
-        config = build_config(
+        config = Config(
             k_colors=k_colors,
             k_seed=k_seed,
             max_kmeans_iterations=max_kmeans_iterations,
