@@ -12,11 +12,11 @@ Dependencies are already bundled with ComfyUI (PyTorch + NumPy); no extra
 packages are required.
 
 ## Node
-- **Names:** `Sprite Fusion Pixel Snapper`, `Sprite Fusion Pixel Snapper (List)`
+- **Name:** `Sprite Fusion Pixel Snapper`
 - **Category:** `image/transform`
 
 ### Inputs
-- `image` – ComfyUI `IMAGE` tensor (single-image input, B=1).
+- `image` – ComfyUI `IMAGE` tensor (batch supported; returns a list).
 - `k_colors` (int) – Palette size (default 16).
 - `k_seed` (int) – RNG seed for palette init (default 42).
 - `output_scale` (int) – Optional integer upscaling after snapping (nearest-neighbor, default 1, max 16).
@@ -28,12 +28,7 @@ Advanced parameters mirror the original Rust defaults and can be tweaked:
 `fallback_target_segments`, `max_step_ratio`.
 
 ### Output
-- `IMAGE` – pixel-snapped result, one frame per input frame.
 - `IMAGE (List)` – per-frame outputs as a list, preserving each frame's size.
-
-### Batch Handling
-- `Sprite Fusion Pixel Snapper` expects a single image (B=1).
-- `Sprite Fusion Pixel Snapper (List)` handles batches and preserves per-frame sizes.
 
 ## Credits
 - Upstream repository: https://github.com/Hugo-Dz/spritefusion-pixel-snapper
