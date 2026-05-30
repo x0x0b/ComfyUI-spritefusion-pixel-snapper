@@ -20,7 +20,7 @@ Place this folder inside `ComfyUI/custom_nodes/` and restart ComfyUI.
 - `pixel_size` (float) – Override the auto-detected input pixel size; `0.0` keeps auto-detection. Values must be between `1` and half the smallest image dimension.
 - `output_scale` (int) – Optional integer upscaling after snapping (nearest-neighbor, default 1, max 16).
 
-Advanced parameters mirror the original Rust defaults and can be tweaked:
+Additional tuning parameters:
 `max_kmeans_iterations`, `peak_threshold_multiplier`, `peak_distance_filter`,
 `walker_search_window_ratio`, `walker_min_search_window`,
 `walker_strength_threshold`, `min_cuts_per_axis`,
@@ -28,6 +28,9 @@ Advanced parameters mirror the original Rust defaults and can be tweaked:
 
 ### Output
 - `IMAGE (List)` – per-frame outputs as a list, preserving each frame's size.
+
+### Compatibility note
+This is a Python port, not a byte-for-byte Rust wrapper; results may differ from upstream.
 
 ## Credits
 - Upstream repository: https://github.com/Hugo-Dz/spritefusion-pixel-snapper
