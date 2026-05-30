@@ -20,6 +20,7 @@ import torch
 @dataclass
 class Config:
     k_colors: int = 16
+    pixel_size_override: float = 0.0
     k_seed: int = 42
     max_kmeans_iterations: int = 15
     peak_threshold_multiplier: float = 0.2
@@ -251,6 +252,9 @@ def resolve_step_sizes(
     height: int,
     config: Config,
 ) -> Tuple[float, float]:
+    if config.pixel_size_override != 0.0:
+        return config.pixel_size_override, config.pixel_size_override
+
     if step_x_opt is not None and step_y_opt is not None:
         sx, sy = step_x_opt, step_y_opt
         ratio = sx / sy if sx > sy else sy / sx
@@ -530,6 +534,14 @@ def process_image_array(img: np.ndarray, config: Config) -> np.ndarray:
         raise PixelSnapperError("Input image contains NaN or Inf values.")
 
     validate_image_dimensions(w, h)
+    if config.pixel_size_override != 0.0:
+        max_pixel_size = min(w, h) / 2.0
+        px = config.pixel_size_override
+        if not math.isfinite(px) or px < 1.0 or px > max_pixel_size:
+            raise PixelSnapperError(
+                f"pixel_size_override {px:.1f} is out of valid range "
+                f"[1, {max_pixel_size:.1f}]"
+            )
 
     quantized = quantize_image(img, config)
     profile_x, profile_y = compute_profiles(quantized)
@@ -681,6 +693,16 @@ class PixelSnapperNode:
                         "tooltip": "Max allowed X/Y step ratio before snapping to a uniform grid",
                     },
                 ),
+                "pixel_size": (
+                    "FLOAT",
+                    {
+                        "default": 0.0,
+                        "min": 0.0,
+                        "max": 10000.0,
+                        "step": 0.1,
+                        "tooltip": "Override detected pixel size in input pixels; 0 keeps auto-detection",
+                    },
+                ),
             },
         }
 
@@ -704,9 +726,11 @@ class PixelSnapperNode:
         min_cuts_per_axis: int = 4,
         fallback_target_segments: int = 64,
         max_step_ratio: float = 1.8,
+        pixel_size: float = 0.0,
     ):
         config = Config(
             k_colors=k_colors,
+            pixel_size_override=pixel_size,
             k_seed=k_seed,
             max_kmeans_iterations=max_kmeans_iterations,
             peak_threshold_multiplier=peak_threshold_multiplier,
