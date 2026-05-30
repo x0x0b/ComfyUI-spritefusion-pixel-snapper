@@ -190,6 +190,10 @@ def quantize_image(img: np.ndarray, config: Config) -> np.ndarray:
                 break
         prev_centroids = centroids.copy()
 
+    diff = pixels[:, None, :] - centroids[None, :, :]
+    dists = np.sum(diff * diff, axis=2)
+    labels = np.argmin(dists, axis=1)
+
     best = centroids[labels].round().clip(0, 255).astype(np.uint8)
     return best.reshape(img.shape)
 
