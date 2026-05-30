@@ -598,16 +598,6 @@ class PixelSnapperNode:
                 ),
             },
             "optional": {
-                "pixel_size": (
-                    "FLOAT",
-                    {
-                        "default": 0.0,
-                        "min": 0.0,
-                        "max": 10000.0,
-                        "step": 0.1,
-                        "tooltip": "Override detected pixel size in input pixels; 0 keeps auto-detection",
-                    },
-                ),
                 "output_scale": (
                     "INT",
                     {
@@ -703,6 +693,16 @@ class PixelSnapperNode:
                         "tooltip": "Max allowed X/Y step ratio before snapping to a uniform grid",
                     },
                 ),
+                "pixel_size": (
+                    "FLOAT",
+                    {
+                        "default": 0.0,
+                        "min": 0.0,
+                        "max": 10000.0,
+                        "step": 0.1,
+                        "tooltip": "Override detected pixel size in input pixels; 0 keeps auto-detection",
+                    },
+                ),
             },
         }
 
@@ -716,7 +716,6 @@ class PixelSnapperNode:
         image: torch.Tensor,
         k_colors: int,
         k_seed: int,
-        pixel_size: float = 0.0,
         output_scale: int = 1,
         max_kmeans_iterations: int = 15,
         peak_threshold_multiplier: float = 0.2,
@@ -727,6 +726,7 @@ class PixelSnapperNode:
         min_cuts_per_axis: int = 4,
         fallback_target_segments: int = 64,
         max_step_ratio: float = 1.8,
+        pixel_size: float = 0.0,
     ):
         config = Config(
             k_colors=k_colors,
