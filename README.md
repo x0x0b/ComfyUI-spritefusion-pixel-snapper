@@ -17,6 +17,7 @@ Place this folder inside `ComfyUI/custom_nodes/` and restart ComfyUI.
 - `image` – ComfyUI `IMAGE` tensor (batch supported; returns a list).
 - `k_colors` (int) – Palette size (default 16).
 - `k_seed` (int) – RNG seed for palette init (default 42).
+- `pixel_size` (float) – Override the auto-detected input pixel size; `0.0` keeps auto-detection. Values must be between `1` and half the smallest image dimension.
 - `output_scale` (int) – Optional integer upscaling after snapping (nearest-neighbor, default 1, max 16).
 
 Advanced parameters mirror the original Rust defaults and can be tweaked:
