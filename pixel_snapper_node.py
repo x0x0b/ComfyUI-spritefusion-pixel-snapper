@@ -540,7 +540,7 @@ def process_image_array(img: np.ndarray, config: Config) -> np.ndarray:
         if not math.isfinite(px) or px < 1.0 or px > max_pixel_size:
             raise PixelSnapperError(
                 f"pixel_size_override {px:.1f} is out of valid range "
-                f"[1, {int(max_pixel_size)}]"
+                f"[1, {max_pixel_size:.1f}]"
             )
 
     quantized = quantize_image(img, config)
